@@ -51,12 +51,19 @@ class BaselineNLPFlow(FlowSpec):
     @step
     def baseline(self):
         "Compute the baseline"
+        import numpy as np
         from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
+        np.random.seed(42)
+
         ### TODO: Fit and score a baseline model on the data, log the acc and rocauc as artifacts.
-        self.valdf['model1'] = 1.0
-        self.base_acc = accuracy_score(self.valdf['label'], self.valdf['model1'])
-        self.base_rocauc = roc_auc_score(self.valdf['label'], self.valdf['model1'])
-        self.tn, self.fp, self.fn, self.tp = confusion_matrix(self.valdf['label'], self.valdf['model1']).ravel()
+        #self.valdf['model1'] = 1.0
+
+        pos_prob = self.traindf['label'].sum() / len(self.traindf)
+        self.preds = np.random.choice([0, 1], size=len(self.valdf), p=[1 - pos_prob, pos_prob])
+
+        self.base_acc = accuracy_score(self.valdf['label'], self.preds)
+        self.base_rocauc = roc_auc_score(self.valdf['label'], self.preds)#self.valdf['model1'])
+        self.tn, self.fp, self.fn, self.tp = confusion_matrix(self.valdf['label'], self.preds).ravel()
         self.next(self.end)
         
     @card(type='corise') # TODO: after you get the flow working, chain link on the left side nav to open your card!
