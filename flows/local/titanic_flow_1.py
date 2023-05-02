@@ -17,7 +17,8 @@ class TFlow1(FlowSpec):
         # NOTE: The data path in read_csv is relative to where you run command from.
         self.df = pd.read_csv("./data/titanic.csv")
         self.next(self.predict)
-
+    
+    @card
     @step
     def predict(self):
         """
