@@ -51,11 +51,12 @@ class GoodFirstModelNLPFlow(FlowSpec):
     @step
     def train_predict(self):
         "Compute the ML predictions"
+
         from sklearn.pipeline import Pipeline
-        from sklearn.feature_extraction.text import CountVectorizer
-        from sklearn.feature_extraction.text import TfidfTransformer
+        from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
         from sklearn.naive_bayes import MultinomialNB
         from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
+
         text_clf = Pipeline([
             ('vect', CountVectorizer()),
             ('tfidf', TfidfTransformer()),
@@ -63,11 +64,11 @@ class GoodFirstModelNLPFlow(FlowSpec):
             ])
         text_clf.fit(self.traindf['review'], self.traindf['label'])
                 
-        self.valdf['model_MultinomialNB'] = text_clf.predict(self.valdf['review'])
+        self.preds = text_clf.predict(self.valdf['review'])
         
-        self.model_acc = accuracy_score(self.valdf['label'], self.valdf['model_MultinomialNB'])
-        self.model_rocauc = roc_auc_score(self.valdf['label'], self.valdf['model_MultinomialNB'])
-        self.model_tn, self.model_fp, self.model_fn, self.model_tp = confusion_matrix(self.valdf['label'], self.valdf['model_MultinomialNB']).ravel()
+        self.model_acc = accuracy_score(self.valdf['label'], self.preds)
+        self.model_rocauc = roc_auc_score(self.valdf['label'], self.preds)
+        self.model_tn, self.model_fp, self.model_fn, self.model_tp = confusion_matrix(self.valdf['label'], self.preds).ravel()
         self.next(self.end)
         
     @card(type='corise') # TODO: after you get the flow working, chain link on the left side nav to open your card!

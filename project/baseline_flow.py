@@ -52,14 +52,20 @@ class BaselineNLPFlow(FlowSpec):
     def baseline(self):
         "Compute the baseline"
         import numpy as np
+        from sklearn.dummy import DummyClassifier
         from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix
         np.random.seed(42)
 
         ### TODO: Fit and score a baseline model on the data, log the acc and rocauc as artifacts.
         #self.valdf['model1'] = 1.0
 
-        pos_prob = self.traindf['label'].sum() / len(self.traindf)
-        self.preds = np.random.choice([0, 1], size=len(self.valdf), p=[1 - pos_prob, pos_prob])
+        #pos_prob = self.traindf['label'].sum() / len(self.traindf)
+        #self.preds = np.random.choice([0, 1], size=len(self.valdf), p=[1 - pos_prob, pos_prob])
+        #“most_frequent”, “prior”, “stratified”, “uniform”, “constant”
+        dummy_clf = DummyClassifier(strategy="stratified")
+        dummy_clf.fit(self.traindf['review'], self.traindf['label'])
+        
+        self.preds = dummy_clf.predict(self.valdf['review'])
 
         self.base_acc = accuracy_score(self.valdf['label'], self.preds)
         self.base_rocauc = roc_auc_score(self.valdf['label'], self.preds)#self.valdf['model1'])
